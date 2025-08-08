@@ -5,7 +5,7 @@ An AI-powered health consultation system that combines web scraping, RAG (Retrie
 ## 🌟 Features
 
 - **🔍 Intelligent Web Scraping**: Automatically scrapes and processes health forum data with doctor responses
-- **🤖 RAG-Powered Chatbot**: Uses GPT-4 with vector search for accurate, context-aware responses
+- **🤖 RAG-Powered Chatbot**: Uses GPT-4 Turbo with vector search for accurate, context-aware responses
 - **📊 Data Analytics Dashboard**: Visualize health trends, disease distributions, and forum activity
 - **🩺 Doctor Insights**: Leverages real medical expert responses from forums
 - **🔄 Incremental Updates**: Smart update system that only fetches new content
@@ -23,6 +23,7 @@ An AI-powered health consultation system that combines web scraping, RAG (Retrie
 | FAISS | 1.8.0 | Vector similarity search |
 | BeautifulSoup4 | 4.12.3 | Web scraping |
 | Pandas | 2.2.2 | Data manipulation |
+| **GPT Model** | **GPT-4 Turbo** | **Latest GPT-4 model for enhanced responses** |
 
 ## 🏗️ Architecture
 
@@ -86,9 +87,9 @@ An AI-powered health consultation system that combines web scraping, RAG (Retrie
 ```
 agnos-health-assistant-v0.1/
 ├── streamlit_app/           # Streamlit application
-│   ├── app.py              # Main chatbot interface
+│   ├── Agnos_Health_Chatbot.py  # Main chatbot interface
 │   └── pages/              # Multi-page app pages
-│       └── 1_📊_Data_Management.py
+│       └── Data_Management.py
 ├── src/                    # Source code modules
 │   ├── __init__.py        # Package initialization
 │   ├── config.py          # Configuration settings
@@ -285,7 +286,7 @@ MAX_THREADS=50                          # Max forum threads to scrape
 CHUNK_SIZE=1000                        # Text chunk size for embeddings
 CHUNK_OVERLAP=100                      # Overlap between chunks
 EMBEDDING_MODEL=text-embedding-3-small # OpenAI embedding model
-LLM_MODEL=gpt-4o-mini                  # Language model (gpt-4o-mini is cost-effective)
+LLM_MODEL=gpt-4-turbo-preview          # Language model (GPT-4 Turbo for best quality)
 ```
 
 > 💡 **Tips for API Key**:

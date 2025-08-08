@@ -37,11 +37,15 @@ class SimpleAgnosHealthRAG:
         # Set API key as environment variable to avoid proxy issues
         os.environ["OPENAI_API_KEY"] = self.openai_api_key
         
+        # Get model configuration from environment or use defaults
+        model_name = os.getenv('LLM_MODEL', 'gpt-4o-mini')
+        temperature = float(os.getenv('TEMPERATURE', '0.7'))
+        
         # Initialize without passing api_key directly to avoid proxy parameter issues
         self.embeddings = OpenAIEmbeddings()
         self.llm = ChatOpenAI(
-            temperature=0.7,
-            model_name="gpt-4o-mini"
+            temperature=temperature,
+            model_name=model_name  # Using GPT-4 Turbo for better performance and cost efficiency
         )
         
     def load_documents(self) -> List[Document]:
