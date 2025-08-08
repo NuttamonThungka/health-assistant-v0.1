@@ -113,26 +113,20 @@ agnos-health-assistant-v0.1/
 └── README.md           # This file
 ```
 
-## ⚡ Quick Start (5 Minutes)
-
-For experienced developers, here's the fastest setup:
+## ⚡ Quick Start (2 Minutes)
 
 ```bash
 # Clone and enter directory
 git clone https://github.com/yourusername/health-assistant.git && cd health-assistant-v0.1
 
-# Setup Python 3.11 virtual environment
-python3.11 -m venv venv && source venv/bin/activate
+# Run automated setup
+./setup.sh
 
-# Install dependencies
-pip install --upgrade pip && pip install -r requirements.txt
+# Add your OpenAI API key
+nano .env
 
-# Configure API key
-cp .env.example .env
-echo "OPENAI_API_KEY=sk-your-key-here" > .env
-
-# Run the app
-./venv/bin/streamlit run streamlit_app/app.py
+# Run the application (handles all venv issues automatically)
+./start.sh
 ```
 
 ## 🚀 Detailed Setup
@@ -147,7 +141,7 @@ echo "OPENAI_API_KEY=sk-your-key-here" > .env
 
 > ⚠️ **Important**: This project requires Python 3.11. Using other versions may cause compatibility issues with LangChain and OpenAI packages.
 
-### Installation
+### Manual Installation (Alternative)
 
 1. **Clone the repository**
 ```bash
@@ -155,91 +149,63 @@ git clone https://github.com/yourusername/health-assistant.git
 cd health-assistant-v0.1
 ```
 
-2. **Check Python version**
+2. **Run automated setup**
 ```bash
-python3 --version
-# If not 3.11, install it:
-# macOS: brew install python@3.11
-# Ubuntu/Debian: sudo apt install python3.11
-# Windows: Download from python.org
+# This handles everything: Python check, venv creation, dependencies
+chmod +x setup.sh
+./setup.sh
 ```
 
-3. **Create virtual environment with Python 3.11**
+3. **Configure your API key**
 ```bash
-# Ensure you're using Python 3.11
-python3.11 -m venv venv
-
-# Activate virtual environment
-# On macOS/Linux:
-source venv/bin/activate
-
-# On Windows:
-venv\Scripts\activate
-```
-
-4. **Verify Python version in venv**
-```bash
-python --version
-# Should show: Python 3.11.x
-```
-
-5. **Install dependencies**
-```bash
-# Upgrade pip first (IMPORTANT)
-pip install --upgrade pip
-
-# Install all requirements
-pip install -r requirements.txt
-
-# Note: If you get errors, try installing packages individually:
-# pip install openai==1.99.4
-# pip install langchain-openai==0.3.28
-# pip install langchain-core==0.3.74
-```
-
-6. **Set up environment variables**
-```bash
-# Copy the example file
-cp .env.example .env
-
-# Edit .env file with your favorite editor
-nano .env  # or vim, code, etc.
+# Edit the .env file created by setup
+nano .env
 
 # Add your OpenAI API key:
-# OPENAI_API_KEY=sk-your-actual-api-key-here
+OPENAI_API_KEY=sk-your-actual-api-key-here
 ```
 
-7. **Initialize the system**
+4. **Run the application**
 ```bash
-# Run setup script
-./venv/bin/python scripts/setup.py
+# Use the robust launcher that handles venv conflicts
+./start.sh
 
-# This will:
-# - Verify all dependencies
-# - Create necessary directories
-# - Initialize the vector database
-# - Load sample data
-```
-
-8. **Run the application**
-```bash
-# Method 1: Direct execution (RECOMMENDED)
-./venv/bin/streamlit run streamlit_app/Agnos_Health_Chatbot.py
-
-# Method 2: Using Python module
-python -m streamlit run streamlit_app/Agnos_Health_Chatbot.py
-
-# Method 3: Using the run script (auto-setup)
-chmod +x run.sh
+# Alternative (if you want to use run.sh)
 ./run.sh
 ```
 
 The application will open automatically in your browser at `http://localhost:8501`
 
-> 📝 **Important Notes**: 
-> - Always use `./venv/bin/streamlit` to avoid system Python conflicts
-> - The first run may take a few minutes to initialize the vector database
-> - Ensure your OpenAI API key has sufficient credits
+### Alternative Manual Method
+
+If you prefer to do everything manually:
+
+```bash
+# Create virtual environment
+python3.11 -m venv venv
+
+# IMPORTANT: Activate virtual environment first
+source venv/bin/activate
+
+# Verify you're in the virtual environment (should show venv path)
+which python
+
+# Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env to add your API key: nano .env
+
+# IMPORTANT: Make sure venv is still activated (you should see (venv) in your prompt)
+# If not, run: source venv/bin/activate
+
+# Run application
+streamlit run streamlit_app/Agnos_Health_Chatbot.py
+```
+
+> ⚠️ **Critical**: Always ensure your terminal prompt shows `(venv)` before running any commands. If you don't see it, run `source venv/bin/activate` first.
 
 ## 💻 Usage
 
@@ -417,15 +383,35 @@ echo "OPENAI_API_KEY=sk-your-key-here" > .env
 #### 5. Virtual environment not activated
 **Problem**: Commands use system Python instead of venv.
 
-**Solution**: Always activate venv or use full paths.
+**Solution**: Always activate venv first.
 ```bash
-# Activate venv
+# Check if venv is activated (should see (venv) in prompt)
+echo $VIRTUAL_ENV
+
+# If not activated, activate it:
 source venv/bin/activate  # macOS/Linux
 venv\Scripts\activate     # Windows
 
-# Or use full paths (no activation needed)
-./venv/bin/python scripts/setup.py
-./venv/bin/streamlit run streamlit_app/app.py
+# Verify activation worked:
+which python  # Should show path with /venv/bin/python
+python -c "import sys; print(sys.prefix)"  # Should show venv path
+
+# Now run normally:
+streamlit run streamlit_app/Agnos_Health_Chatbot.py
+```
+
+#### 6. Multiple Python/Streamlit installations conflict
+**Problem**: System has multiple Python installations causing conflicts.
+
+**Solution**: Always verify you're using the right Python.
+```bash
+# After activating venv, check:
+which python    # Should show: /path/to/your/project/venv/bin/python
+which streamlit # Should show: /path/to/your/project/venv/bin/streamlit
+
+# If wrong paths shown, deactivate and reactivate:
+deactivate
+source venv/bin/activate
 ```
 
 ## 🤝 Contributing

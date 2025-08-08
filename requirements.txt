@@ -9,17 +9,14 @@ beautifulsoup4==4.12.3
 requests==2.32.3
 lxml==5.2.2
 
-# AI/ML Dependencies - Updated for compatibility
-openai==1.99.4
-langchain==0.2.12
-langchain-community==0.2.11
-langchain-openai==0.3.28
-langchain-core==0.3.74
-langchain-text-splitters==0.2.4
+# AI/ML Dependencies
+openai>=1.35.0
+langchain>=0.2.0
+langchain-community>=0.2.0
+langchain-openai>=0.1.0
 faiss-cpu==1.8.0.post1
-tiktoken==0.7.0
-tenacity==8.2.2
-jiter==0.10.0
+tiktoken>=0.7.0
+tenacity>=8.2.0
 
 # Data Visualization
 plotly==5.24.1

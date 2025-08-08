@@ -11,11 +11,8 @@ echo ""
 # Check if virtual environment exists
 if [ ! -d "venv" ]; then
     echo "⚠️  No virtual environment found!"
-    echo "   Creating virtual environment with Python 3.11..."
-    python3.11 -m venv venv
-    echo "   Installing dependencies..."
-    ./venv/bin/pip install --upgrade pip
-    ./venv/bin/pip install -r requirements.txt
+    echo "   Please run setup first: ./setup.sh"
+    exit 1
 fi
 
 # Check if .env file exists
@@ -24,17 +21,22 @@ if [ ! -f ".env" ]; then
     echo "   Creating from template..."
     cp .env.example .env
     echo "   Please edit .env and add your OpenAI API key"
+    echo "   Run: nano .env"
     exit 1
 fi
 
-# Check if dependencies are installed
-./venv/bin/python -c "import streamlit" 2>/dev/null
+# Activate virtual environment
+echo "🔄 Activating virtual environment..."
+source venv/bin/activate
+
+# Verify dependencies
+python -c "import streamlit" 2>/dev/null
 if [ $? -ne 0 ]; then
-    echo "📦 Installing dependencies..."
-    ./venv/bin/pip install -r requirements.txt
+    echo "📦 Installing missing dependencies..."
+    pip install -r requirements.txt
 fi
 
-# Run the application using venv Python directly
+# Run the application normally
 echo ""
 echo "🚀 Starting Agnos Health Assistant..."
 echo "   Opening browser at http://localhost:8501"
@@ -42,5 +44,5 @@ echo ""
 echo "Press Ctrl+C to stop the server"
 echo "----------------------------------------"
 
-# Use venv's streamlit directly to avoid system Python issues
-./venv/bin/streamlit run streamlit_app/Agnos_Health_Chatbot.py
+# Run streamlit normally (venv is already activated)
+streamlit run streamlit_app/Agnos_Health_Chatbot.py
