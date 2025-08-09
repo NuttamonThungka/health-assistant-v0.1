@@ -30,29 +30,113 @@ An AI-powered health consultation system that combines web scraping, RAG (Retrie
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     User Interface Layer                     │
-│                   (Streamlit Web Application)                │
+│              (Streamlit Multi-Page Application)              │
+│  ┌─────────────────────────┬────────────────────────────┐  │
+│  │  Agnos_Health_Chatbot   │     Data_Management        │  │
+│  │      (Main Page)        │    (Analytics Page)        │  │
+│  └─────────────────────────┴────────────────────────────┘  │
 ├─────────────────────────────────────────────────────────────┤
-│                         API Layer                            │
-│                    (FastAPI - Optional)                      │
-├─────────────────────────────────────────────────────────────┤
-│                    Application Layer                         │
+│                    Application Core Layer                    │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │   Scraper    │  │  RAG System  │  │   Analytics  │     │
-│  │   Module     │  │    Module    │  │    Module    │     │
+│  │AgnosForumScraper│ SimpleAgnosHealthRAG│   Config      │  │
+│  │   (scraper.py)  │  (rag_system.py)   │ (config.py)   │  │
 │  └──────────────┘  └──────────────┘  └──────────────┘     │
 ├─────────────────────────────────────────────────────────────┤
-│                      Data Layer                              │
+│                   LangChain & AI Layer                       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │  ChatOpenAI  │  │  Embeddings  │  │  FAISS       │     │
+│  │  (GPT-4o)    │  │  (text-3)    │  │(Vector Store)│     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+├─────────────────────────────────────────────────────────────┤
+│                      Data Storage Layer                      │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
 │  │  Forum Data  │  │Vector Store  │  │   Metadata   │     │
-│  │   (JSONL)    │  │   (FAISS)    │  │    (JSON)    │     │
+│  │   (JSONL)    │  │ index.faiss  │  │  index.pkl   │     │
 │  └──────────────┘  └──────────────┘  └──────────────┘     │
 ├─────────────────────────────────────────────────────────────┤
 │                    External Services                         │
-│  ┌──────────────┐  ┌──────────────┐                        │
-│  │  OpenAI API  │  │ Agnos Health │                        │
-│  │    (GPT-4)   │  │    Forums    │                        │
-│  └──────────────┘  └──────────────┘                        │
+│  ┌──────────────┐  ┌──────────────────────────────────┐   │
+│  │  OpenAI API  │  │   Agnos Health Forums             │   │
+│  │ (GPT-4o-mini)│  │ (https://www.agnoshealth.com)    │   │
+│  └──────────────┘  └──────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
+```
+
+## 🔄 System Interaction Flows (Sequence Diagrams)
+
+### 1. User Query Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant Streamlit as Streamlit UI
+    participant RAG as RAG System
+    participant VectorStore as FAISS Vector Store
+    participant OpenAI as OpenAI API
+
+    User->>Streamlit: Enter health question
+    Streamlit->>RAG: Process query
+    RAG->>OpenAI: Generate embedding
+    OpenAI-->>RAG: Return embedding vector
+    RAG->>VectorStore: Search similar documents
+    VectorStore-->>RAG: Return top K matches
+    RAG->>RAG: Extract symptom keywords
+    RAG->>RAG: Calculate relevance scores
+    RAG->>RAG: Extract disease predictions
+    RAG->>OpenAI: Generate response with context
+    OpenAI-->>RAG: Return AI response
+    RAG-->>Streamlit: Return formatted response
+    Streamlit-->>User: Display answer with references
+```
+
+### 2. Data Update Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant Streamlit as Streamlit UI
+    participant Scraper as Forum Scraper
+    participant AgnosHealth as Agnos Health Forums
+    participant RAG as RAG System
+    participant OpenAI as OpenAI API
+    participant VectorStore as FAISS Vector Store
+
+    User->>Streamlit: Request data update
+    Streamlit->>Scraper: Initialize scraper
+    Scraper->>Scraper: Load existing data
+    Scraper->>AgnosHealth: Fetch forum list
+    AgnosHealth-->>Scraper: Return thread list
+    loop For each new thread
+        Scraper->>AgnosHealth: Fetch thread details
+        AgnosHealth-->>Scraper: Return thread content
+        Scraper->>Scraper: Extract doctor comments
+        Scraper->>Scraper: Process & clean data
+    end
+    Scraper->>Scraper: Save to JSONL
+    Scraper->>RAG: Trigger vector store update
+    RAG->>OpenAI: Generate embeddings for new data
+    OpenAI-->>RAG: Return embeddings
+    RAG->>VectorStore: Update index
+    VectorStore-->>RAG: Confirm update
+    RAG-->>Streamlit: Update complete
+    Streamlit-->>User: Show success message
+```
+
+### 3. Analytics View Flow
+```mermaid
+sequenceDiagram
+    participant User
+    participant Streamlit as Streamlit UI
+    participant DataStore as Forum Data (JSONL)
+
+    User->>Streamlit: Navigate to Data Management
+    Streamlit->>DataStore: Load forum_data.jsonl
+    DataStore-->>Streamlit: Return forum data
+    Streamlit->>Streamlit: Analyze data
+    Streamlit->>Streamlit: Calculate statistics
+    Streamlit->>Streamlit: Generate visualizations
+    Streamlit-->>User: Display charts & statistics
+    User->>Streamlit: Filter/Search data
+    Streamlit->>Streamlit: Apply filters
+    Streamlit-->>User: Update visualizations
 ```
 
 ### Data Flow Pipeline
@@ -68,7 +152,7 @@ An AI-powered health consultation system that combines web scraping, RAG (Retrie
 2. RAG Pipeline:
    User Query → Embedding → Vector Search → Context Retrieval
                                               ↓
-                                     GPT-4 Generation
+                                     GPT-4o Generation
                                               ↓
                                      Enhanced Response
                                               ↓
@@ -314,131 +398,6 @@ pytest tests/test_scraper.py
 # With coverage
 pytest --cov=src tests/
 ```
-
-## 📈 Performance
-
-- **Scraping Speed**: ~20 threads/minute
-- **Query Response**: < 3 seconds
-- **Vector Search**: < 500ms
-- **Memory Usage**: ~500MB
-- **Storage**: ~100MB for 1000 threads
-
-## 🔧 Troubleshooting
-
-### Common Issues and Solutions
-
-#### 1. ModuleNotFoundError: No module named 'dotenv' or other modules
-**Problem**: Streamlit runs but can't find installed packages.
-
-**Solution**: You're likely using system Python instead of venv Python.
-```bash
-# Always use one of these methods:
-./venv/bin/streamlit run streamlit_app/app.py  # RECOMMENDED
-# OR
-python -m streamlit run streamlit_app/app.py    # If venv is activated
-```
-
-#### 2. Port 8501 is already in use
-**Problem**: Another Streamlit instance is running.
-
-**Solution**: Kill the existing process or use a different port.
-```bash
-# Kill existing process
-lsof -ti:8501 | xargs kill -9
-
-# Or use a different port
-./venv/bin/streamlit run streamlit_app/app.py --server.port 8502
-```
-
-#### 3. Python version issues
-**Problem**: Wrong Python version being used.
-
-**Solution**: Ensure Python 3.11 is installed and used for venv.
-```bash
-# Check Python version
-python3.11 --version
-
-# Recreate venv with correct Python
-rm -rf venv
-python3.11 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-#### 4. OpenAI API key not found
-**Problem**: Application can't find the API key.
-
-**Solution**: Ensure .env file exists and contains the key.
-```bash
-# Check if .env exists
-ls -la .env
-
-# Create from template if missing
-cp .env.example .env
-
-# Add your API key
-echo "OPENAI_API_KEY=sk-your-key-here" > .env
-```
-
-#### 5. Virtual environment not activated
-**Problem**: Commands use system Python instead of venv.
-
-**Solution**: Always activate venv first.
-```bash
-# Check if venv is activated (should see (venv) in prompt)
-echo $VIRTUAL_ENV
-
-# If not activated, activate it:
-source venv/bin/activate  # macOS/Linux
-venv\Scripts\activate     # Windows
-
-# Verify activation worked:
-which python  # Should show path with /venv/bin/python
-python -c "import sys; print(sys.prefix)"  # Should show venv path
-
-# Now run normally:
-streamlit run streamlit_app/Agnos_Health_Chatbot.py
-```
-
-#### 6. Multiple Python/Streamlit installations conflict
-**Problem**: System has multiple Python installations causing conflicts.
-
-**Solution**: Always verify you're using the right Python.
-```bash
-# After activating venv, check:
-which python    # Should show: /path/to/your/project/venv/bin/python
-which streamlit # Should show: /path/to/your/project/venv/bin/streamlit
-
-# If wrong paths shown, deactivate and reactivate:
-deactivate
-source venv/bin/activate
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## ⚠️ Disclaimer
-
-This system is for informational purposes only and should not replace professional medical advice. Always consult with qualified healthcare providers for medical concerns.
-
-
-## 🔄 Version History
-
-- **v0.1.0** (2024-01-08)
-  - Initial release
-  - Core scraping functionality
-  - RAG-powered chatbot
-  - Data management interface
-  - Thai/English support
 
 ---
 
